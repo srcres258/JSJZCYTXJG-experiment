@@ -3,6 +3,8 @@ VERILATOR_CFLAGS += -MMD --build -cc  \
 				-O3 --x-assign fast --x-initial fast --noassert \
 				-I$(abspath ./vsrc/$(TOPNAME))
 
+SIM_TOPNAME ?= $(TOPNAME)
+
 BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 BIN = $(BUILD_DIR)/$(TOPNAME)
@@ -22,7 +24,7 @@ CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
 $(BIN): $(VSRCS) $(CSRCS)
 	@rm -rf $(OBJ_DIR)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $^ \
+		--top-module $(SIM_TOPNAME) $^ \
 		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
@@ -33,7 +35,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 gen_header:
-	$(VERILATOR) --top-module $(TOPNAME) --Mdir $(OBJ_DIR) --cc $(VSRCS) \
+	$(VERILATOR) --top-module $(SIM_TOPNAME) --Mdir $(OBJ_DIR) --cc $(VSRCS) \
 		-I$(abspath ./vsrc/$(TOPNAME))
 
 .PHONY: default all clean run sim gen_header

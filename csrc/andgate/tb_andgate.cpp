@@ -1,12 +1,12 @@
 #include <verilated.h>
 #include <verilated_fst_c.h>
 
-#include "VEx_1.h"
+#include "Vandgate_sim.h"
 
 VerilatedContext *contextp = nullptr;
 VerilatedFstC *tfp = nullptr;
 
-static VEx_1 *top = nullptr;
+static Vandgate_sim *top = nullptr;
 
 void stepAndDumpWave() {
     top->eval();
@@ -17,7 +17,7 @@ void stepAndDumpWave() {
 void simInit() {
     contextp = new VerilatedContext;
     tfp = new VerilatedFstC;
-    top = new VEx_1;
+    top = new Vandgate_sim;
 
     contextp->traceEverOn(true);
     top->trace(tfp, 0);
@@ -34,14 +34,27 @@ void simExit() {
 }
 
 int main() {
-    uint32_t sw;
-
     simInit();
 
-    for (sw = 0; sw < 1 << 24 - 1; sw++) {
-        top->sw = sw;
-        stepAndDumpWave();
-    }
+    top->a = 0;
+    top->b = 0;
+    top->c = 1;
+    top->d = 1;
+    top->e = 1;
+    top->f = 1;
+    top->g = 1;
+    top->h = 1;
+    stepAndDumpWave();
+
+    top->a = 1;
+    stepAndDumpWave();
+    
+    top->a = 0;
+    top->b = 1;
+    stepAndDumpWave();
+
+    top->a = 1;
+    stepAndDumpWave();
 
     simExit();
     return 0;
