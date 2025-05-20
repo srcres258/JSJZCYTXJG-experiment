@@ -1,0 +1,6 @@
+top=dffe
+
+clrn SW0
+wen SW1
+d SW2
+q LD0
