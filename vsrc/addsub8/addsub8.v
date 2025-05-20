@@ -1,3 +1,5 @@
+/* verilator lint_off WIDTHEXPAND */
+
 `timescale 1ns/1ps
 
 // 加减法器IP核
@@ -13,61 +15,31 @@ module addsub #(
     output sf,              // 符号标志
     output zf               // 零标志
 );
-    // 原码转补码的函数
-    function [WIDTH-1:0] orig_to_comp;
-        input [WIDTH-1:0] orig;
-        reg [WIDTH-2:0] mag;
-        begin
-            mag = orig[WIDTH-2:0];
-            if (mag == 0) begin
-                orig_to_comp = 0;
-            end
-            else if (orig[WIDTH-1]) begin
-                orig_to_comp = { 1'b1, (~mag) + 1'b1 };
-            end
-            else begin
-                orig_to_comp = orig;
-            end
-        end
-    endfunction
+    wire [WIDTH:0] sum_extended;
+    wire [WIDTH-1:0] b_mux;
+    wire cin;
 
-    // 补码转原码的函数
-    function [WIDTH-1:0] comp_to_orig;
-        input [WIDTH-1:0] comp;
-        reg [WIDTH-2:0] mag;
-        begin
-            if (comp == 0) begin
-                comp_to_orig = 0;
-            end
-            else if (comp[WIDTH-1]) begin
-                mag = comp[WIDTH-2:0];
-                mag = ~mag + 1'b1;
-                comp_to_orig = { 1'b1, mag };
-            end
-            else begin
-                comp_to_orig = comp;
-            end
-        end
-    endfunction
+    assign b_mux = sub ? ~b : b;
+    assign cin = sub;
 
-    wire [WIDTH-1:0] a_comp, b_comp;
-    wire [WIDTH-1:0] b_comp_sub;
-    wire [WIDTH:0] temp_sum;
-    wire [WIDTH-1:0] sum_comp, sum_orig;
+    // 计算总和及扩展进位
+    assign sum_extended = a + b_mux + cin;
 
-    assign a_comp = orig_to_comp(a);
-    assign b_comp = orig_to_comp(b);
-    assign b_comp_sub = sub ? ~b_comp + 1'b1 : b_comp;
-    assign temp_sum = a_comp + b_comp_sub;
-    assign sum_comp = temp_sum[WIDTH-1:0];
-    assign sum_orig = comp_to_orig(sum_comp);
+    // 计算结果
+    assign sum = sum_extended[WIDTH-1:0];
 
-    assign sum = sum_orig;
-    assign cf = sub ? ~temp_sum[WIDTH] : temp_sum[WIDTH];
-    assign ovf = a_comp[WIDTH-1] == b_comp_sub[WIDTH-1] &&
-        sum_comp[WIDTH-1] != a_comp[WIDTH-1];
-    assign sf = sum_orig[WIDTH-1];
-    assign zf = sum_orig == 0;
+    // 进位标志：减法时取反进位
+    assign cf = sub ? ~sum_extended[WIDTH] : sum_extended[WIDTH];
+
+    // 溢出标志：根据加减法选择不同条件
+    assign ovf = sub ? (a[WIDTH-1] != b[WIDTH-1] && sum[WIDTH-1] != a[WIDTH-1]) :
+        (a[WIDTH-1] == b[WIDTH-1] && sum[WIDTH-1] != a[WIDTH-1]);
+
+    // 符号标志：结果的最高位
+    assign sf = sum[WIDTH-1];
+
+    // 零标志：结果是否为0
+    assign zf = sum == 0;
 endmodule
 
 // 8位加减法器
