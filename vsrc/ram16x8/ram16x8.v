@@ -31,14 +31,13 @@ module ram16x2 (
 endmodule
 
 // 16x8 RAM，由4个16x2 RAM组成
-
 module ram16x8 (
-    input clk,
-    input we,
-    input en,
-    input [3:0] addr,
-    input [7:0] datain,
-    output [7:0] dataout
+    input clk,              // 时钟信号
+    input we,               // 写使能信号
+    input en,               // 使能信号
+    input [3:0] addr,       // 地址信号
+    input [7:0] datain,     // 数据输入信号
+    output [7:0] dataout    // 数据输出信号
 );
     ram16x2 r0(
         .clk(clk),
