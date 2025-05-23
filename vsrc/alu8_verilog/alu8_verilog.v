@@ -14,8 +14,8 @@ module alu8_verilog (
     wire signed [7:0] minus_b;
     wire signed [8:0] sum_ext, sum_minus_ext;
 
-    assign sum_ext = { a[7], a } + { b[7], b };
-    assign sum_minus_ext = { a[7], a } + { minus_b[7], minus_b };
+    assign sum_ext = { 1'b0, a } + { 1'b0, b };
+    assign sum_minus_ext = { 1'b0, a } + { 1'b0, minus_b };
     assign minus_b = ~b + 1;
     assign sf = res[7];
     assign zf = res == 0;
